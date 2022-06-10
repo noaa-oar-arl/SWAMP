@@ -1,7 +1,7 @@
 # SWAMP
-Repository for the NOAA-ARL/ATDD Soil Water Analysis Model Product (SWAMP) Codes and Run Scripts
+## Repository for the NOAA-ARL/ATDD Soil Water Analysis Model Product (SWAMP) Codes and Run Scripts
 
-SWAMP Library/Software Dependencies:
+## SWAMP Library/Software Dependencies:
 
 Linux-Bash/C-Shell, NCL (with fortran/wrapit77 support), and GDAL
 
@@ -12,7 +12,7 @@ conda activate swamp_stable
 conda install -c conda-forge ncl
 conda install -c conda-forge gdal
 
-SWAMP Usage:
+## SWAMP Usage:
 
 There are five main directories:
 
@@ -31,7 +31,7 @@ The main crn_daily_update.sh script will invoke the following five major steps:
 4. Process daily CRN data based on PRISM, ALEXI, and transfer functions
 5. Create gridded daily and daily station SWAMP soil moisture products 
 
-SWAMP Main Routines:
+## SWAMP Main Routines:
 
 MAIN_CRN/crn_daily_update.sh
 MAIN_CRN/setcase.csh
