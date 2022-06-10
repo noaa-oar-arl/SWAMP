@@ -11,18 +11,18 @@ source ./setcase.csh
 source ./module_file
 
 #1.  Download and process daily CRN for SWAMP in respecitve year.
-#./downftp
-#echo "finished downftp"
+./downftp
+echo "finished downftp"
 
 #2.  Download and process daily PRISM for SWAMP in respective year.
-#cd ../PRISM
-#./runprism
-#echo "finished runprism"
+cd ../PRISM
+./runprism
+echo "finished runprism"
 
 #3.   Download daily ALEXI for SWAMP.
-#cd ../ALEXI
-#./runalexi
-#echo "finished runalexi:"
+cd ../ALEXI
+./runalexi
+echo "finished runalexi:"
 
 #4.  This calls the main SWAMP processing for daily and daily_station outputs.
 
@@ -31,11 +31,4 @@ cd ../MAIN_CRN
 ./runscript
 echo "finished runscript"
 
-#5.  This is the main upload scripts to your respecitve FTP (if necessary)
-
-#cd ../PROCESS_DAILY
-#upftp
-#echo "upload 1"
-#cd ../PROCESS_DAILY_STATION/
-#upftp
-#echo "upload 2"
+echo "SWAMP Completed!"

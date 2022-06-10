@@ -3,35 +3,35 @@
 export NCARG_ROOT=/groups/ESS/pcampbe8/anaconda3/envs/swamp_stable
 
 #Step 1: Processes CRN files for necessary files, site locations, and extracts variables to create new SWAMP CRN input files
-#echo "Step one...Creating CRN text files"
-#ncl create_crn.ncl
+echo "Step one...Creating CRN text files"
+ncl create_crn.ncl
 
-#if [ ! -d "../PROCESS_DAILY/variables_${YEAR_CRN}" ] 
-#then
-#    echo "Directory ../PROCESS_DAILY/variables_${YEAR_CRN} DOES NOT exist...making" 
-#    mkdir ../PROCESS_DAILY/variables_${YEAR_CRN}
-#fi
-#cp *_${YEAR_CRN}.txt ../PROCESS_DAILY/variables_${YEAR_CRN}
-#cp soil_water*.txt ../PROCESS_DAILY/variables_${YEAR_CRN}
-#cp soil_properties.txt ../PROCESS_DAILY/variables_${YEAR_CRN}
+if [ ! -d "../PROCESS_DAILY/variables_${YEAR_CRN}" ] 
+then
+    echo "Directory ../PROCESS_DAILY/variables_${YEAR_CRN} DOES NOT exist...making" 
+    mkdir ../PROCESS_DAILY/variables_${YEAR_CRN}
+fi
+cp *_${YEAR_CRN}.txt ../PROCESS_DAILY/variables_${YEAR_CRN}
+cp soil_water*.txt ../PROCESS_DAILY/variables_${YEAR_CRN}
+cp soil_properties.txt ../PROCESS_DAILY/variables_${YEAR_CRN}
 
-#if [ ! -d "../PROCESS_DAILY_STATION/variables_${YEAR_CRN}" ]
-#then
-#    echo "Directory ../PROCESS_DAILY_STATION/variables_${YEAR_CRN} DOES NOT exist...making"
-#    mkdir ../PROCESS_DAILY_STATION/variables_${YEAR_CRN}
-#fi
-#cp *_${YEAR_CRN}.txt ../PROCESS_DAILY_STATION/variables_${YEAR_CRN}
-#cp soil_water*.txt ../PROCESS_DAILY_STATION/variables_${YEAR_CRN}
-#cp soil_properties.txt ../PROCESS_DAILY_STATION/variables_${YEAR_CRN}
+if [ ! -d "../PROCESS_DAILY_STATION/variables_${YEAR_CRN}" ]
+then
+    echo "Directory ../PROCESS_DAILY_STATION/variables_${YEAR_CRN} DOES NOT exist...making"
+    mkdir ../PROCESS_DAILY_STATION/variables_${YEAR_CRN}
+fi
+cp *_${YEAR_CRN}.txt ../PROCESS_DAILY_STATION/variables_${YEAR_CRN}
+cp soil_water*.txt ../PROCESS_DAILY_STATION/variables_${YEAR_CRN}
+cp soil_properties.txt ../PROCESS_DAILY_STATION/variables_${YEAR_CRN}
 
 #Step 2: Main SWAMP transfer function/processing scripts on CRN data for daily gridded output
-#echo "Step two...creating gridded CRN files and gridded daily SWAMP products..."
-#cd ../PROCESS_DAILY/
-#echo "Compiling NCL wrapped Fortran77 routines with wrapit77..."
-#WRAPIT swamp.f
-#WRAPIT swampi.f
-#WRAPIT weight.f
-#./runit
+echo "Step two...creating gridded CRN files and gridded daily SWAMP products..."
+cd ../PROCESS_DAILY/
+echo "Compiling NCL wrapped Fortran77 routines with wrapit77..."
+WRAPIT swamp.f
+WRAPIT swampi.f
+WRAPIT weight.f
+./runit
 
 #Step 3: Main SWAMP transfer function/processing scripts on CRN data for daily station output
 echo "Step three...creating gridded CRN files and gridded daily station SWAMP products..."
@@ -39,8 +39,3 @@ cd ../PROCESS_DAILY_STATION/
 echo "Compiling NCL wrapped Fortran77 routines with wrapit77..."
 WRAPIT statmatch.f
 ./runit
-
-#
-#Step 4:  Upload ftp .nc files to dedicated server
-
-echo "SWAMP Processing Complete!"
