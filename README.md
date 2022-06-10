@@ -2,16 +2,20 @@
 Repository for the NOAA-ARL/ATDD Soil Water Analysis Model Product (SWAMP) Codes and Run Scripts
 
 SWAMP Library/Software Dependencies:
+
 Linux-Bash/C-Shell, NCL (with fortran/wrapit77 support), and GDAL
 
 Recommend creating a stable Anaconda3 environment for SWAMP with NCL and GDAL included
+
 conda create --name swamp_stable
 conda activate swamp_stable
 conda install -c conda-forge ncl
 conda install -c conda-forge gdal
 
 SWAMP Usage:
+
 There are five main directories:
+
 MAIN_CRN, PRISM, ALEXI, PROCESS_DAILY, and PROCESS_DAILY_STATION
 
 1.  After setup of conda environment with both NCL and GDAL libraries, activate environment:  conda activate swamp_stable
@@ -28,6 +32,7 @@ The main crn_daily_update.sh script will invoke the following five major steps:
 5. Create gridded daily and daily station SWAMP soil moisture products 
 
 SWAMP Main Routines:
+
 MAIN_CRN/crn_daily_update.sh
 MAIN_CRN/setcase.csh
 MAIN_CRN/module_file
