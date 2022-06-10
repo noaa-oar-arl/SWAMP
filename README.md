@@ -33,7 +33,8 @@ The main crn_daily_update.sh script will invoke the following five major steps:
 
 ## SWAMP Main Routines:
 
-MAIN_CRN/crn_daily_update.sh
+ - `MAIN_CRN/crn_daily_update.sh`
+
 MAIN_CRN/setcase.csh
 MAIN_CRN/module_file
 MAIN_CRN/downftp
