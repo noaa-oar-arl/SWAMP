@@ -1,0 +1,23 @@
+#!/bin/csh
+
+ncl Air_temp_grid.ncl
+ncl Avail_water_depth_grid.ncl
+ncl Fract_avail_water_grid.ncl
+ncl Precip_grid.ncl
+ncl Smois_05cm_grid.ncl
+ncl Smois_10cm_grid.ncl
+ncl Smois_20cm_grid.ncl
+ncl Smois_50cm_grid.ncl
+ncl Smois_100cm_grid.ncl
+ncl Soiltemp_05cm_grid.ncl
+ncl Soiltemp_10cm_grid.ncl
+ncl Soiltemp_20cm_grid.ncl
+ncl Soiltemp_50cm_grid.ncl
+ncl Soiltemp_100cm_grid.ncl
+ncl Solar_grid.ncl
+ncl Surface_temp_grid.ncl
+ncl RH_grid.ncl
+ncl Sur_temp_min_grid.ncl
+ncl Sur_temp_max_grid.ncl
+ncl Temp_min_grid.ncl
+ncl Temp_max_grid.ncl

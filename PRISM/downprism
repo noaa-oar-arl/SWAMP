@@ -1,0 +1,15 @@
+#!/bin/bash
+
+remotefiles="/daily/ppt/$YEAR_CRN/*"
+hostname="prism.nacse.org"
+username="anonymous"
+password="First.Last@noaa.gov"
+ftp -in $hostname<<EOF
+quote USER $username
+quote PASS $password
+
+binary
+cd /daily/ppt/$YEAR_CRN/
+mget *
+quit
+EOF

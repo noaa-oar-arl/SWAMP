@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ ! -f ../PROCESS_DAILY/vegsoil_dist_4km.nc ] || [ ! -f ../PROCESS_DAILY/veg_2011_30m.nc ] || [ ! -f ../PROCESS_DAILY/AWC_WTA_0to10cm_composite.nc ]
+then
+    echo "vegsoil4swamp files do not exist...downloading and untarring vegsoil4swamp files..."
+    cd ../PROCESS_DAILY/
+    wget -O vegsoil4swamp_nc.tar "https://www.dropbox.com/s/brnkfle61jzlggf/vegsoil4swamp_nc.tar?dl=0"
+    tar -xvf vegsoil4swamp_nc.tar 
+else
+    echo "OK...vegsoil4swamp files file found"
+fi
+
+if [ ! -f ../PROCESS_DAILY/vegsoil_dist_4km.nc ] || [ ! -f ../PROCESS_DAILY/veg_2011_30m.nc ] || [ ! -f ../PROCESS_DAILY/AWC_WTA_0to10cm_composite.nc ]
+then
+echo "vegsoil4swamp files do not exist..stopping"
+exit 1
+fi
+
+cd ../MAIN_CRN

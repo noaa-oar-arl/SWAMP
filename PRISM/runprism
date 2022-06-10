@@ -1,0 +1,17 @@
+#!/bin/csh
+
+#Download PRISM data and unzip
+./downprism
+unzip -n \*.zip
+
+#Convert .bil to .nc files using GDAL 
+./bil2nc
+mkdir ../${YEAR_CRN}_c
+mv *.nc ../${YEAR_CRN}_c
+cd ../${YEAR_CRN}_c
+
+#List files
+rm prism_list_${YEAR_CRN}
+ls *sta*nc > prism_list_${YEAR_CRN}
+ls *pro*nc >> prism_list_${YEAR_CRN}
+ls *early*nc >> prism_list_${YEAR_CRN}

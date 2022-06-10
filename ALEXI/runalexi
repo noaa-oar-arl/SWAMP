@@ -1,0 +1,13 @@
+#!/bin/sh
+#This script simply downloads the ALEXI data from NASA website given the user start and end dates for given year.
+echo "Downloading ALEXI data..."
+DATE_CRN=$SDATE_CRN
+while [ $DATE_CRN -le $EDATE_CRN ]
+do
+echo $DATE_CRN
+curl -O https://geo.nsstc.nasa.gov/SPoRT/outgoing/crh/4ecostress/$DATE_CRN/ALEXI_ET_4KM_CONUS_V01_$DATE_CRN.dat
+DATE_CRN=$(( $DATE_CRN + 1 ))
+done
+#write file list to text file below.
+rm alexi_list_${YEAR_CRN}
+ls *ALEXI_ET_4KM_CONUS_V01_${YEAR_CRN}* > alexi_list_${YEAR_CRN}

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Download daily USCRN data files from NCDC FTP
+remotefiles="/pub/data/uscrn/products/daily01/$YEAR_CRN/*"
+hostname="ftp.ncdc.noaa.gov"
+username="anonymous"
+password="First.Last@noaa.gov"
+ftp -in $hostname<<EOF
+quote USER $username
+quote PASS $password
+
+cd /pub/data/uscrn/products/daily01/$YEAR_CRN/
+mget *
+quit
+EOF
+
+ls CRN*.txt > crn_namelist_${YEAR_CRN}.txt
