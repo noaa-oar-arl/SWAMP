@@ -100,14 +100,10 @@ begin
 
   TestData=new(totday,string)
 
-
 ;---Looping through to convert string CRN data to float values in new arrays-------;
   do j=6,nstat6-1
   do i=0,nstat-1
-
-;  if(nrow(i).eq.totday) then
   TestData(0:nrow(i)-1) = asciiread (names(i) , -1, "string")
-
   statid(:,i) = tointeger(str_get_field(TestData,1,delim))
 
   if(statid(1,i).eq.ids(j-6)) then

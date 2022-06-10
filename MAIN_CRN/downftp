@@ -13,5 +13,5 @@ cd /pub/data/uscrn/products/daily01/$YEAR_CRN/
 mget *
 quit
 EOF
-
+rm -f crn_namelist_${YEAR_CRN}.txt
 ls CRN*.txt > crn_namelist_${YEAR_CRN}.txt
