@@ -3,14 +3,14 @@
 
 ## SWAMP Library/Software Dependencies:
 
-Linux-Bash/C-Shell, NCL (with fortran/wrapit77 support), and GDAL
+ - Linux-Bash/C-Shell, NCL (with fortran/wrapit77 support), and GDAL
 
-Recommend creating a stable Anaconda3 environment for SWAMP with NCL and GDAL included
+ - Recommend creating a stable Anaconda3 environment for SWAMP with NCL and GDAL included
 
-conda create --name swamp_stable
-conda activate swamp_stable
-conda install -c conda-forge ncl
-conda install -c conda-forge gdal
+ - `conda create --name swamp_stable`
+ - `conda activate swamp_stable`
+ - `conda install -c conda-forge ncl`
+ - `conda install -c conda-forge gdal`
 
 ## SWAMP Usage:
 
@@ -18,10 +18,10 @@ There are five main directories:
 
 MAIN_CRN, PRISM, ALEXI, PROCESS_DAILY, and PROCESS_DAILY_STATION
 
-1.  After setup of conda environment with both NCL and GDAL libraries, activate environment:  conda activate swamp_stable
-2.  Change directory into MAIN_CRN.
-3.  Setup the setcase.csh script for specific year and run days for SWAMP (can only run over a single year at this point).
-4.  Run the ./crn_daily_update.sh script.
+ - After setup of conda environment with both NCL and GDAL libraries, activate environment:  conda activate swamp_stable
+ - Change directory into MAIN_CRN.
+ - Setup the setcase.csh script for specific year and run days for SWAMP (can only run over a single year at this point).
+ - Run the `./crn_daily_update.sh` script.
 
 The main crn_daily_update.sh script will invoke the following five major steps:
 
@@ -34,8 +34,7 @@ The main crn_daily_update.sh script will invoke the following five major steps:
 ## SWAMP Main Routines:
 
  - `MAIN_CRN/crn_daily_update.sh`
-
-MAIN_CRN/setcase.csh
+ - `MAIN_CRN/setcase.csh`
 MAIN_CRN/module_file
 MAIN_CRN/downftp
 MAIN_CRN/getvegsoilnc4swamp
