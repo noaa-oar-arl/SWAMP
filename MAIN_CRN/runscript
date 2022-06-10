@@ -4,6 +4,7 @@ export NCARG_ROOT=/groups/ESS/pcampbe8/anaconda3/envs/swamp_stable
 
 #Step 1: Processes CRN files for necessary files, site locations, and extracts variables to create new SWAMP CRN input files
 echo "Step one...Creating CRN text files"
+cp stationID_lat_lon.txt stationID_lat_lon_${YEAR_CRN}.txt
 ncl create_crn.ncl
 
 if [ ! -d "../PROCESS_DAILY/variables_${YEAR_CRN}" ] 

@@ -43,6 +43,7 @@ The main crn_daily_update.sh script will invoke the following five major steps:
  - `MAIN_CRN/soil_water.txt`
  - `MAIN_CRN/soil_water_o.txt`
  - `MAIN_CRN/soil_properties.txt`
+ - `stationID_lat_lon.txt`
  - `PRISM/runprism`
  - `PRISM/downprism`
  - `PRISM/bil2nc`
