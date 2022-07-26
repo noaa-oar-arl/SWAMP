@@ -22,7 +22,7 @@ begin
   yearcrn = getenv("YEAR_CRN")
   sdate  = stringtointeger(getenv("SDATE_CRN"))
   edate  = stringtointeger(getenv("EDATE_CRN"))
-  totday = edate-sdate+1
+  totday = edate-sdate+2
 
   names = new(nstat,string)
   ids = new(nstat,integer)
