@@ -7,7 +7,10 @@ do
 echo $DATE_CRN
 DATE_CRNm1=$(( $DATE_CRN - 1 ))
 curl -O https://geo.nsstc.nasa.gov/SPoRT/outgoing/crh/4ecostress/$DATE_CRN/ALEXI_ET_4KM_CONUS_V01_$DATE_CRN.dat
-grep -l "Not Found" ALEXI_ET_4KM_CONUS_V01_$DATE_CRN.dat | xargs cp ALEXI_ET_4KM_CONUS_V01_$DATE_CRNm1.dat ALEXI_ET_4KM_CONUS_V01_$DATE_CRN.dat
+if grep -l "Not Found" ALEXI_ET_4KM_CONUS_V01_$DATE_CRN.dat; then
+   echo "ALEXI data missing...using previous day's file data!"
+   cp -f ALEXI_ET_4KM_CONUS_V01_$DATE_CRNm1.dat ALEXI_ET_4KM_CONUS_V01_$DATE_CRN.dat
+fi
 DATE_CRN=$(( $DATE_CRN + 1 ))
 done
 #write file list to text file below.
