@@ -5,7 +5,9 @@ DATE_CRN=$SDATE_CRN
 while [ $DATE_CRN -le $EDATE_CRN ]
 do
 echo $DATE_CRN
+DATE_CRNm1=$(( $DATE_CRN - 1 ))
 curl -O https://geo.nsstc.nasa.gov/SPoRT/outgoing/crh/4ecostress/$DATE_CRN/ALEXI_ET_4KM_CONUS_V01_$DATE_CRN.dat
+grep -l "Not Found" ALEXI_ET_4KM_CONUS_V01_$DATE_CRN.dat | xargs cp ALEXI_ET_4KM_CONUS_V01_$DATE_CRNm1.dat ALEXI_ET_4KM_CONUS_V01_$DATE_CRN.dat
 DATE_CRN=$(( $DATE_CRN + 1 ))
 done
 #write file list to text file below.
