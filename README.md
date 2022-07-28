@@ -48,6 +48,19 @@ The main crn_daily_update.sh script will invoke the following five major steps:
  - `PRISM/downprism`
  - `PRISM/bil2nc`
  - `ALEXI/runalexi`
+ - `PROCESS_DAILY/slp_weights.txt`
+ - `PROCESS_DAILY/int_weights.txt`
+ - `PROCESS_DAILY/minmax_2010.txt`
+ - `PROCESS_DAILY/minmax_2011.txt`
+ - `PROCESS_DAILY/minmax_2012.txt`
+ - `PROCESS_DAILY/minmax_2013.txt`
+ - `PROCESS_DAILY/minmax_2014.txt`
+ - `PROCESS_DAILY/minmax_2015.txt`
+ - `PROCESS_DAILY/minmax_2016.txt`
+ - `PROCESS_DAILY/minmax_2017.txt`
+ - `PROCESS_DAILY/minmax_2018.txt`
+ - `PROCESS_DAILY/minmax_2019.txt`
+ - `PROCESS_DAILY/minmax_2020.txt`
  - `PROCESS_DAILY/swamp.f`
  - `PROCESS_DAILY/swampi.f`
  - `PROCESS_DAILY/weight.f`
