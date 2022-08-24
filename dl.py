@@ -240,7 +240,7 @@ def get_prism(days, *, use_cache=True):
     return ds
 
 
-def get_alexi(days):
+def get_alexi(days, *, use_cache=True):
     """Get ALEXI data.
     
     Only available for current year!
@@ -271,14 +271,16 @@ def get_alexi(days):
         fn = f"ALEXI_ET_4KM_CONUS_V01_{yj}.dat"
         fp = CACHE_DIR / fn
 
-        # Download file
-        url = f"{base_url}/{yj}/{fn}"
-        print(url)
-        r = requests.get(url)
-        r.raise_for_status()
-        # NOTE: sometimes dir for current day doesn't have the ET file yet
-        with open(fp, "wb") as f:
-            f.write(r.content)
+        is_cached = fp.is_file()
+        if not is_cached or not use_cache:
+            # Download file
+            url = f"{base_url}/{yj}/{fn}"
+            print(url)
+            r = requests.get(url)
+            r.raise_for_status()
+            # NOTE: sometimes dir for current day doesn't have the ET file yet
+            with open(fp, "wb") as f:
+                f.write(r.content)
 
         alexi_nlat = 625  # TODO: confirm the grid stuff!?
         alexi_nlon = 1456
