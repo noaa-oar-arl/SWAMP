@@ -319,22 +319,27 @@ def get_alexi(days, *, use_cache=True):
 
 
 if __name__ == "__main__":
+    import cartopy.crs as ccrs
+    import matplotlib.pyplot as plt
+    
     days = pd.date_range("2022/08/01", periods=2, freq="D")
     print(days)
 
-    # df = get_crn(days)
+    df_c = get_crn(days)
+    ds_p = get_prism(days)
+    ds_a = get_alexi(days)
 
-    # ds = get_prism(days)
-
-    ds = get_alexi(days)
-
-    import cartopy.crs as ccrs
-    import matplotlib.pyplot as plt
-
-    # Check that the ALEXI grid looks correct
+    # Check that the grids look correct
     tran = ccrs.PlateCarree()
     proj = ccrs.Mercator()
-    fig, ax = plt.subplots(subplot_kw=dict(projection=proj), figsize=(10, 5), constrained_layout=True)
+    subplots_kw = dict(subplot_kw=dict(projection=proj), figsize=(10, 5), constrained_layout=True)
+
+    fig, ax = plt.subplots(**subplots_kw)
     ax.coastlines(color="orangered", linewidth=3)
     ax.gridlines(draw_labels=True)
-    ds.isel(time=0).et.plot(ax=ax, transform=tran)
+    ds_p.isel(time=0).ppt.plot(ax=ax, transform=tran)
+
+    fig, ax = plt.subplots(**subplots_kw)
+    ax.coastlines(color="orangered", linewidth=3)
+    ax.gridlines(draw_labels=True)
+    ds_a.isel(time=0).et.plot(ax=ax, transform=tran)
