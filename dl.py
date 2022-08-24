@@ -335,6 +335,8 @@ if __name__ == "__main__":
     import cartopy.crs as ccrs
     import matplotlib.pyplot as plt
 
+    plt.close("all")
+
     days = pd.date_range("2022/08/01", periods=2, freq="D")
     print(days)
 
@@ -345,14 +347,16 @@ if __name__ == "__main__":
     # Check that the grids look correct
     tran = ccrs.PlateCarree()
     proj = ccrs.Mercator()
-    subplots_kw = dict(subplot_kw=dict(projection=proj), figsize=(10, 5), constrained_layout=True)
 
-    fig, ax = plt.subplots(**subplots_kw)
-    ax.coastlines(color="orangered", linewidth=3)
-    ax.gridlines(draw_labels=True)
-    ds_p.isel(time=0).ppt.plot(ax=ax, transform=tran)
+    def get_ax():
+        _, ax = plt.subplots(
+            subplot_kw=dict(projection=proj), figsize=(10, 5), constrained_layout=True
+        )
+        ax.coastlines(color="orangered", linewidth=3)
+        ax.gridlines(draw_labels=True)
+        return ax
 
-    fig, ax = plt.subplots(**subplots_kw)
-    ax.coastlines(color="orangered", linewidth=3)
-    ax.gridlines(draw_labels=True)
-    ds_a.isel(time=0).et.plot(ax=ax, transform=tran)
+    ds_p.isel(time=0).ppt.plot(ax=get_ax(), transform=tran)
+    ds_a.isel(time=0).et.plot(ax=get_ax(), transform=tran)
+
+    plt.show()
