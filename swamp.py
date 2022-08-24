@@ -9,6 +9,7 @@ HERE = Path(__file__).parent
 ORIG = HERE / "orig"
 
 # Define output grid
+# NOTE: this is 2.4-km in lat and ~ 7-km in lon
 ny, nx = (720, 1150)
 lat = np.linspace(25, 50, nx)
 lon = np.linspace(-125, -65, ny)
