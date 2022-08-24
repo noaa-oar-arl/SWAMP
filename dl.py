@@ -54,7 +54,7 @@ def get_crn(days, *, use_cache=True):
         if year not in available_years:
             raise ValueError(f"year {year} not in detected available years {available_years}")
 
-        cached_fp = CACHE_DIR / f"crn_{year}.csv.gz"
+        cached_fp = CACHE_DIR / f"CRN_{year}.csv.gz"
         is_cached = cached_fp.is_file()
 
         if not is_cached or not use_cache:
