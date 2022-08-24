@@ -356,7 +356,13 @@ if __name__ == "__main__":
         ax.gridlines(draw_labels=True)
         return ax
 
-    ds_p.isel(time=0).ppt.plot(ax=get_ax(), transform=tran)
-    ds_a.isel(time=0).et.plot(ax=get_ax(), transform=tran)
+    p = ds_p.isel(time=0).ppt
+    et = ds_a.isel(time=0).et
+    d = p.interp(lat=et.lat, lon=et.lon) - et  # note: different grids
+    d.attrs.update(long_name="P - ET", units="mm")
+
+    p.plot(ax=get_ax(), transform=tran)
+    et.plot(ax=get_ax(), transform=tran)
+    d.plot(ax=get_ax(), transform=tran)
 
     plt.show()
