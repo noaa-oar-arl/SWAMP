@@ -239,10 +239,100 @@ def get_prism(days, *, use_cache=True):
 
     return ds
 
+
+def get_alexi(days):
+    """Get ALEXI data.
+    
+    Only available for current year!
+
+    Data: https://geo.nsstc.nasa.gov/SPoRT/outgoing/crh/4ecostress/
+    """
+    days = pd.DatetimeIndex(days)
+
+    base_url = "https://geo.nsstc.nasa.gov/SPoRT/outgoing/crh/4ecostress"
+
+    yjs = days.strftime(r"%Y%j").unique()
+
+    # Get available yjs from the main page
+    # e.g. `>2022001<`
+    url = f"{base_url}/"
+    r = requests.get(url)
+    r.raise_for_status()
+    available_yjs = re.findall(r">([0-9]{7})<", r.text)
+    if not available_yjs:
+        warnings.warn(f"search of {base_url}/ detected no available dates")
+
+    dss_per_yj = []
+    for yj in yjs:
+        if yj not in available_yjs:
+            raise ValueError(f"date {yj} not in detected available dates {available_yjs}")
+
+        # e.g. https://geo.nsstc.nasa.gov/SPoRT/outgoing/crh/4ecostress/2022019/ALEXI_ET_4KM_CONUS_V01_2022019.dat
+        fn = f"ALEXI_ET_4KM_CONUS_V01_{yj}.dat"
+        fp = CACHE_DIR / fn
+
+        # Download file
+        url = f"{base_url}/{yj}/{fn}"
+        print(url)
+        r = requests.get(url)
+        r.raise_for_status()
+        # NOTE: sometimes dir for current day doesn't have the ET file yet
+        with open(fp, "wb") as f:
+            f.write(r.content)
+
+        alexi_nlat = 625  # TODO: confirm the grid stuff!?
+        alexi_nlon = 1456
+        alexi_lllat = 24.80
+        alexi_lllon = -125.0
+        alexi_dlat = 0.04
+        alexi_dlon = 0.04
+        alexi_bad = -9999.
+        arr = np.fromfile(fp, dtype=np.float32)
+        arr = arr.reshape(alexi_nlat, alexi_nlon)
+        arr[arr == alexi_bad] = np.nan
+
+        # Construct Dataset
+        lat = alexi_lllat + np.arange(alexi_nlat) * alexi_dlat
+        lon = alexi_lllon + np.arange(alexi_nlon) * alexi_dlon
+        ds = xr.Dataset(
+            data_vars={
+                "et": (("lat", "lon"), arr, {
+                    "long_name": "Evapotranspiration",
+                    "units": "mm",
+                    "description": "Daily evapotranspiration",
+                }),
+            },
+            coords={
+                "lat": (("lat",), lat),
+                "lon": (("lon",), lon),
+            }
+        )
+        dss_per_yj.append(ds)
+
+    # Combined Dataset
+    ds = xr.concat(dss_per_yj, dim="time")
+    ds["time"] = (("time",), pd.to_datetime(yjs, format=r"%Y%j"))
+
+    return ds
+
+
 if __name__ == "__main__":
-    days = pd.date_range("2020/08/01", periods=2, freq="D")
+    days = pd.date_range("2022/08/01", periods=2, freq="D")
     print(days)
 
     # df = get_crn(days)
 
-    ds = get_prism(days)
+    # ds = get_prism(days)
+
+    ds = get_alexi(days)
+
+    import cartopy.crs as ccrs
+    import matplotlib.pyplot as plt
+
+    # Check that the ALEXI grid looks correct
+    tran = ccrs.PlateCarree()
+    proj = ccrs.Mercator()
+    fig, ax = plt.subplots(subplot_kw=dict(projection=proj), figsize=(10, 5), constrained_layout=True)
+    ax.coastlines(color="orangered", linewidth=3)
+    ax.gridlines(draw_labels=True)
+    ds.isel(time=0).et.plot(ax=ax, transform=tran)
