@@ -273,7 +273,7 @@ def get_alexi(days, *, use_cache=True):
 
         is_cached = fp.is_file()
         if not is_cached or not use_cache:
-            # Download file
+            # Download file (~ 3.5 MB)
             url = f"{base_url}/{yj}/{fn}"
             print(url)
             r = requests.get(url)
