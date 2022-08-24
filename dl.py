@@ -287,6 +287,7 @@ def get_alexi(days, *, use_cache=True):
             print(url)
             r = requests.get(url)
             r.raise_for_status()
+            # TODO: not too uncommon to be missing, should improve error message
             # NOTE: sometimes dir for current day doesn't have the ET file yet
             with open(fp, "wb") as f:
                 f.write(r.content)
