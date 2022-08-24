@@ -86,7 +86,7 @@ def get_crn(days, *, use_cache=True):
             df = pd.read_csv(cached_fp, index_col=0, parse_dates=["LST_DATE"])
 
         if not is_cached:
-            df.to_csv(cached_fp)
+            df.to_csv(cached_fp)  # ~ 2 MB
 
         dfs_per_year.append(df)
 
@@ -154,7 +154,7 @@ def get_prism(days, *, use_cache=True):
                 warnings.warn(f"no files found for year {year} (url {url})")
             fns_year[year] = available_fns
 
-        # Download zip archive
+        # Download zip archive (~ 1--2 MB)
         # https://prism.oregonstate.edu/documents/PRISM_downloads_FTP.pdf
         # e.g. `https://ftp.prism.oregonstate.edu/daily/ppt/1996/PRISM_ppt_stable_4kmD2_19960101_bil.zip`
 
