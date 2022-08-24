@@ -16,7 +16,7 @@ assert CACHE_DIR.is_dir()
 
 
 def get_crn(days, *, use_cache=True):
-    """Get daily soil and vegetation CRN data for `days`.
+    """Get daily soil (and vegetation?) CRN data for `days`.
 
     https://www.ncei.noaa.gov/access/crn/qcdatasets.html
     """
@@ -24,8 +24,9 @@ def get_crn(days, *, use_cache=True):
 
     # Get metadata
     # "This file contains the following three lines: Field Number, Field Name and Unit of Measure."
+    base_url = "https://www.ncei.noaa.gov/pub/data/uscrn/products/daily01"
     r = requests.get(
-        "https://www.ncei.noaa.gov/pub/data/uscrn/products/daily01/headers.txt",
+        f"{base_url}/headers.txt",
     )
     r.raise_for_status()
     lines = r.text.splitlines()
@@ -37,7 +38,7 @@ def get_crn(days, *, use_cache=True):
 
     # Get available years from the main page
     # e.g. `>2000/<`
-    r = requests.get("https://www.ncei.noaa.gov/pub/data/uscrn/products/daily01/")
+    r = requests.get(f"{base_url}/")
     r.raise_for_status()
     available_years = re.findall(r">([0-9]{4})/?<", r.text)
 
@@ -55,7 +56,7 @@ def get_crn(days, *, use_cache=True):
         if not is_cached or not use_cache:
             # Get filenames from the year page
             # e.g. `>CRND0103-2020-TX_Palestine_6_WNW.txt<`
-            url = f"https://www.ncei.noaa.gov/pub/data/uscrn/products/daily01/{year}/"
+            url = f"{base_url}/{year}/"
             r = requests.get(url)
             r.raise_for_status()
             fns = re.findall(r">(CRN[a-zA-Z0-9\-_]*\.txt)<", r.text)
@@ -64,7 +65,7 @@ def get_crn(days, *, use_cache=True):
             
             dfs_per_file = []
             for fn in fns:
-                url = f"https://www.ncei.noaa.gov/pub/data/uscrn/products/daily01/{year}/{fn}"
+                url = f"{base_url}/{year}/{fn}"
                 print(url)
                 df = pd.read_csv(
                     url,
