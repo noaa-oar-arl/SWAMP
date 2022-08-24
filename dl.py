@@ -38,7 +38,7 @@ def get_crn(days, *, use_cache=True):
     nums = lines[0].split()
     columns = lines[1].split()
     assert len(nums) == len(columns)
-    assert nums == [str(i+1) for i in range(len(columns))]
+    assert nums == [str(i + 1) for i in range(len(columns))]
 
     # Get available years from the main page
     # e.g. `>2000/<`
@@ -66,7 +66,7 @@ def get_crn(days, *, use_cache=True):
             fns = re.findall(r">(CRN[a-zA-Z0-9\-_]*\.txt)<", r.text)
             if not fns:
                 warnings.warn(f"no files found for year {year} (url {url})")
-            
+
             dfs_per_file = []
             for fn in fns:
                 url = f"{base_url}/{year}/{fn}"
@@ -92,19 +92,15 @@ def get_crn(days, *, use_cache=True):
 
     # Combined df
     site_cols = [
-        'WBANNO',
-        'LST_DATE',
-        'CRX_VN',
-        'LONGITUDE',
-        'LATITUDE',
+        "WBANNO",
+        "LST_DATE",
+        "CRX_VN",
+        "LONGITUDE",
+        "LATITUDE",
     ]
     assert set(site_cols) < set(df)
     data_cols = [c for c in df.columns if c not in site_cols]
-    df = (
-        pd.concat(dfs_per_year)
-        .dropna(subset=data_cols, how="all")
-        .reset_index(drop=True)
-    )
+    df = pd.concat(dfs_per_year).dropna(subset=data_cols, how="all").reset_index(drop=True)
     if df.empty:
         warnings.warn("dataframe empty after dropping missing data rows")
 
@@ -116,7 +112,7 @@ def get_crn(days, *, use_cache=True):
 
 def get_prism(days, *, use_cache=True):
     """Get PRISM precip data.
-    
+
     Info: https://prism.oregonstate.edu/
 
     Data: https://ftp.prism.oregonstate.edu/daily/ppt/
@@ -186,7 +182,7 @@ def get_prism(days, *, use_cache=True):
                 f.write(r.content)
 
         # Get the BIL from the zip
-        with zipfile.ZipFile(zip_fp, 'r') as zf:
+        with zipfile.ZipFile(zip_fp, "r") as zf:
             bil_fn = str(Path(fn).with_suffix(".bil"))
             try:
                 data = zf.read(bil_fn)  # bytes
@@ -204,32 +200,45 @@ def get_prism(days, *, use_cache=True):
         prism_nrows = 621
         prism_nodata = -9999
         prism_ulxmap = -125.000000000000
-        prism_ulymap =   49.916666666667
-        prism_xdim   =    0.041666666667  # 2.5 arc minutes, ~ 4 km
-        prism_ydim   =    0.041666666667
+        prism_ulymap = 49.916666666667
+        prism_xdim = 0.041666666667  # 2.5 arc minutes, ~ 4 km
+        prism_ydim = 0.041666666667
         prism_array = np.frombuffer(data, dtype=np.float32)  # note: `np.fromfile()` didn't work
         prism_array = prism_array.reshape(prism_nrows, prism_ncols)
 
         # Construct Dataset
-        arr = np.where(prism_array == prism_nodata, np.nan, prism_array)  # note: couldn't modify buffer in place
+        arr = np.where(
+            prism_array == prism_nodata, np.nan, prism_array
+        )  # note: couldn't modify buffer in place
         lon = prism_ulxmap + np.arange(prism_ncols) * prism_xdim
         lat = prism_ulymap - np.arange(prism_nrows) * prism_ydim
         ds = xr.Dataset(
             data_vars={
-                "ppt": (("lat", "lon"), arr, {
-                    "long_name": "Precipitation",
-                    "units": "mm",
-                    "description": "Daily total precipitation (rain + melted snow)",
-                }),
-                "ppt_stability": ((), stab, {
-                    "long_name": "Stability",
-                    "description": "'stable', 'provisional', or 'early', mostly depending on when the data was released",
-                }),
+                "ppt": (
+                    ("lat", "lon"),
+                    arr,
+                    {
+                        "long_name": "Precipitation",
+                        "units": "mm",
+                        "description": "Daily total precipitation (rain + melted snow)",
+                    },
+                ),
+                "ppt_stability": (
+                    (),
+                    stab,
+                    {
+                        "long_name": "Stability",
+                        "description": (
+                            "'stable', 'provisional', or 'early', "
+                            "mostly depending on when the data was released"
+                        ),
+                    },
+                ),
             },
             coords={
                 "lat": (("lat",), lat),
                 "lon": (("lon",), lon),
-            }
+            },
         )
         dss_per_day.append(ds)
 
@@ -242,7 +251,7 @@ def get_prism(days, *, use_cache=True):
 
 def get_alexi(days, *, use_cache=True):
     """Get ALEXI data.
-    
+
     Only available for current year!
 
     Data: https://geo.nsstc.nasa.gov/SPoRT/outgoing/crh/4ecostress/
@@ -288,7 +297,7 @@ def get_alexi(days, *, use_cache=True):
         alexi_lllon = -125.0
         alexi_dlat = 0.04
         alexi_dlon = 0.04
-        alexi_bad = -9999.
+        alexi_bad = -9999.0
         arr = np.fromfile(fp, dtype=np.float32)
         arr = arr.reshape(alexi_nlat, alexi_nlon)
         arr[arr == alexi_bad] = np.nan
@@ -298,16 +307,20 @@ def get_alexi(days, *, use_cache=True):
         lon = alexi_lllon + np.arange(alexi_nlon) * alexi_dlon
         ds = xr.Dataset(
             data_vars={
-                "et": (("lat", "lon"), arr, {
-                    "long_name": "Evapotranspiration",
-                    "units": "mm",
-                    "description": "Daily evapotranspiration",
-                }),
+                "et": (
+                    ("lat", "lon"),
+                    arr,
+                    {
+                        "long_name": "Evapotranspiration",
+                        "units": "mm",
+                        "description": "Daily evapotranspiration",
+                    },
+                ),
             },
             coords={
                 "lat": (("lat",), lat),
                 "lon": (("lon",), lon),
-            }
+            },
         )
         dss_per_yj.append(ds)
 
@@ -321,7 +334,7 @@ def get_alexi(days, *, use_cache=True):
 if __name__ == "__main__":
     import cartopy.crs as ccrs
     import matplotlib.pyplot as plt
-    
+
     days = pd.date_range("2022/08/01", periods=2, freq="D")
     print(days)
 
