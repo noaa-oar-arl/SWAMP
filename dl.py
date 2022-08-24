@@ -114,7 +114,7 @@ def get_crn(days, *, use_cache=True):
     return df
 
 
-def get_prism(days):
+def get_prism(days, *, use_cache=True):
     """Get PRISM precip data.
     
     Info: https://prism.oregonstate.edu/
@@ -174,14 +174,16 @@ def get_prism(days):
         if stab in stabilities[1:]:
             warnings.warn(f"note 'stable' file for {ymd} not found, using {stab!r}")
 
-        # Download file
-        url = f"{base_url}/{year}/{fn}"
-        print(url)
-        r = requests.get(url)
-        r.raise_for_status()
         zip_fp = CACHE_DIR / fn
-        with open(zip_fp, "wb") as f:
-            f.write(r.content)
+        is_cached = zip_fp.is_file()
+        if not is_cached or not use_cache:
+            # Download file
+            url = f"{base_url}/{year}/{fn}"
+            print(url)
+            r = requests.get(url)
+            r.raise_for_status()
+            with open(zip_fp, "wb") as f:
+                f.write(r.content)
 
         # Get the BIL from the zip
         with zipfile.ZipFile(zip_fp, 'r') as zf:
@@ -192,6 +194,7 @@ def get_prism(days):
                 print(f"{bil_fn!r} not found in archive. Archive namelist: {zf.namelist()}")
                 raise
 
+            # BIL metadata (text file)
             # hdr_fn = str(Path(fn).with_suffix(".hdr"))
 
         # Read the BIL into an array
