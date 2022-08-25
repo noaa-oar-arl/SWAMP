@@ -4,12 +4,15 @@ SWAMP
 import warnings
 from pathlib import Path
 
+import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
 
 from dl import get_alexi, get_prism
+
+plt.close("all")
 
 warnings.filterwarnings("ignore", message=r"note 'stable' PRISM file for [0-9]{8} not found")
 
@@ -31,6 +34,7 @@ grid = xr.Dataset(
 # For now, use the coeffs that already exist
 # NOTE: slp is the one that gets used in the current original SWAMP
 # NOTE: this array has 39% 0 values and 17% -21.52 values, the rest positive but < 1
+# NOTE: some of the -21.52 values are over land (TX ~ 27 and below, FL ~ 26 and below), makes results weird
 slp_coeffs = np.loadtxt(ORIG / "PROCESS_DAILY/slp_weights.txt")
 int_coeffs = np.loadtxt(ORIG / "PROCESS_DAILY/int_weights.txt")
 assert slp_coeffs.shape == int_coeffs.shape == (nlat, nlon)
@@ -51,19 +55,22 @@ print("loading ALEXI ET")
 et = get_alexi(days).et
 print("computing P - ET")
 p_minus_et = p.interp(lat=grid.lat, lon=grid.lon) - et.interp(lat=grid.lat, lon=grid.lon)
+p_minus_et.attrs.update(long_name="P - ET", units="mm")
 # NOTE: original SWAMP multiples ET by 0.408, but they already have matching units...??
 
 # Initialize sm dataset
 print("computing SM")
 ds = grid.copy()
-ds["c"] = (("lat", "lon"), c)
+ds["c"] = (("lat", "lon"), c, {"long_name": "Coefficient"})
+ds["c"] = ds.c.where(ds.c > 0, np.nan)
 ds["sm"] = (("time", "lat", "lon"), np.empty((ntime, nlat, nlon)), {"long_name": "Soil moisture"})
 ds["time"] = days
 
 if ic is None:
-    # Default IC: 0 but using the land mask from P - ET
+    # Default IC: 0 but using the land mask from P - ET or c
     # TODO: maybe better to use regionmask since inland NaN areas seem to change
-    x = p_minus_et.isel(time=0)
+    # x = p_minus_et.isel(time=0)
+    x = ds.c
     ic = x.where(x.isnull(), 0)
 
 ds["sm"].loc[dict(time=days[0])] = ic
@@ -74,6 +81,23 @@ for i in range(1, len(days)):
     ds["sm"].loc[dict(time=days[i])] = np.clip(ds.sm.isel(time=i - 1) + delta / 1000, 0, 1)
 
 
-ds.sm.plot(col="time", col_wrap=5, vmax=0.1, size=2, aspect=1.5)
+# -21.25 coeffs
+proj = ccrs.Mercator()
+tran = ccrs.PlateCarree()
+fig, ax = plt.subplots(subplot_kw=dict(projection=proj))
+ax.coastlines(linewidth=3, color="orangered")
+ax.gridlines(draw_labels=True)
+ax.pcolormesh(lon, lat, np.where(slp_coeffs == -21.52, 1, np.nan), transform=tran)
+
+# Plot coeffs
+print("plotting")
+ds.c.plot(vmin=0, size=4, aspect=1.6)
+plt.tight_layout()
+
+# Plot P - ET
+p_minus_et.plot(col="time", col_wrap=5, robust=True, size=2, aspect=1.5)
+
+# Plot results
+ds.sm.plot(col="time", col_wrap=5, robust=True, size=2, aspect=1.5)
 
 plt.show()
