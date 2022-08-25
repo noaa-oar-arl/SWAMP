@@ -275,6 +275,7 @@ def get_alexi(days, *, use_cache=True):
             f"search of {base_url}/ detected no available dates for ALEXI ET", stacklevel=2
         )
 
+    n_missing_days = 0
     dss_per_yj = []
     for yj in yjs:
         if yj not in available_yjs:
@@ -291,15 +292,15 @@ def get_alexi(days, *, use_cache=True):
             print(url)
             r = requests.get(url)
             if r.status_code == 404:
-                raise ValueError(
-                    f"ALEXI ET file {url} not found. Check {base_url}/{yj}/ to confirm."
+                warnings.warn(
+                    f"ALEXI ET file {url} not found. Check {base_url}/{yj}/ to confirm.",
+                    stacklevel=2,
                 )
-                # TODO: try to use closest previous date that _does_ exist?
             else:
                 r.raise_for_status()
-            # NOTE: sometimes dir for current day doesn't have the ET file yet
-            with open(fp, "wb") as f:
-                f.write(r.content)
+                # NOTE: sometimes dir for current day doesn't have the ET file yet
+                with open(fp, "wb") as f:
+                    f.write(r.content)
 
         alexi_nlat = 625  # TODO: confirm the grid stuff!?
         alexi_nlon = 1456
@@ -308,9 +309,15 @@ def get_alexi(days, *, use_cache=True):
         alexi_dlat = 0.04
         alexi_dlon = 0.04
         alexi_bad = -9999.0
-        arr = np.fromfile(fp, dtype=np.float32)
-        arr = arr.reshape(alexi_nlat, alexi_nlon)
-        arr[arr == alexi_bad] = np.nan
+        if fp.is_file():
+            arr = np.fromfile(fp, dtype=np.float32)
+            arr = arr.reshape(alexi_nlat, alexi_nlon)
+            arr[arr == alexi_bad] = np.nan
+        else:
+            # No data -> all nan (but fill later!)
+            arr = np.full((alexi_nlat, alexi_nlon), np.nan, dtype=np.float32)
+            warnings.warn(f"setting ALEXI ET array to NaN since {fp.name} is missing", stacklevel=2)
+            n_missing_days += 1
 
         # Construct Dataset
         lat = alexi_lllat + np.arange(alexi_nlat) * alexi_dlat
@@ -337,6 +344,11 @@ def get_alexi(days, *, use_cache=True):
     # Combined Dataset
     ds = xr.concat(dss_per_yj, dim="time")
     ds["time"] = (("time",), pd.to_datetime(yjs, format=r"%Y%j"))
+    if n_missing_days == len(yjs):
+        raise ValueError("all ALEXI ET data is NaN, won't interpolate")
+    if n_missing_days:
+        ds = ds.interpolate_na(dim="time", method="nearest")
+        # TODO: quite slow! better to find the nearest day another way and take its array before the concat
 
     return ds
 

@@ -33,21 +33,25 @@ int_coeffs = np.loadtxt(ORIG / "PROCESS_DAILY/int_weights.txt")
 assert slp_coeffs.shape == int_coeffs.shape == (nlat, nlon)
 c = slp_coeffs
 
-# NOTE: 215 (08/03) is missing
-start = "2022/05/01"
-end = "2022/05/20"
+# NOTE: 215 (08/03) is missing, as are other random days
+start = "2022/04/01"
+end = "2022/04/16"
 ic = None
 
 days = pd.date_range(start, end, freq="D")
 ntime = len(days)
 
 # Compute P - ET at the grid
+print("loading PRISM P")
 p = get_prism(days).ppt
+print("loading ALEXI ET")
 et = get_alexi(days).et
+print("computing P - ET")
 p_minus_et = p.interp(lat=grid.lat, lon=grid.lon) - et.interp(lat=grid.lat, lon=grid.lon)
 # NOTE: original SWAMP multiples ET by 0.408, but they already have matching units...??
 
 # Initialize sm dataset
+print("computing SM")
 ds = grid.copy()
 ds["c"] = (("lat", "lon"), c)
 ds["sm"] = (("time", "lat", "lon"), np.zeros((ntime, nlat, nlon)), {"long_name": "Soil moisture"})
