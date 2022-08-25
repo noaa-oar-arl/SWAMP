@@ -62,6 +62,7 @@ ds["time"] = days
 
 if ic is None:
     # Default IC: 0 but using the land mask from P - ET
+    # TODO: maybe better to use regionmask since inland NaN areas seem to change
     x = p_minus_et.isel(time=0)
     ic = x.where(x.isnull(), 0)
 
@@ -73,6 +74,6 @@ for i in range(1, len(days)):
     ds["sm"].loc[dict(time=days[i])] = np.clip(ds.sm.isel(time=i - 1) + delta / 1000, 0, 1)
 
 
-ds.sm.plot(col="time", col_wrap=5, vmax=0.1)
+ds.sm.plot(col="time", col_wrap=5, vmax=0.1, size=2, aspect=1.5)
 
 plt.show()
