@@ -7,6 +7,7 @@ import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy import interpolate
 
 # from dl import get_crn
 
@@ -75,15 +76,26 @@ for i, id_ in enumerate(site_id):
 df_orig = pd.DataFrame({"site_id": site_id, "lat": lat, "lon": lon, "dmin": dmin, "dmax": dmax})
 
 # To grid??
+df_ = df_orig.dropna(subset=["lat", "lon", "dmax"])
+points = (df_.lon, df_.lat)
+values = df_.dmax
+grid_x, grid_y = np.mgrid[-125:-65:300j, 25:50:200j]
+out = interpolate.griddata(points, values, (grid_x, grid_y), method="nearest")
+# NOTE: linear and nearest look the best
+# NOTE: really should transform from lat/lon from x/y for the interp
 
 # Plot
 proj = ccrs.Mercator()
 tran = ccrs.PlateCarree()
-fig, ax = plt.subplots(subplot_kw=dict(projection=proj), constrained_layout=True)
+fig, ax = plt.subplots(subplot_kw=dict(projection=proj), constrained_layout=True, figsize=(7, 4))
 ax.set_extent([-125, -70, 25, 50])
-ax.coastlines(linewidth=1.5, color="0.5", zorder=0)
+ax.coastlines(linewidth=1.5, color="0.5")
 ax.gridlines(draw_labels=True)
-im = ax.scatter(df_orig.lon, df_orig.lat, s=60, c=df_orig.dmax, transform=tran)
+im = ax.scatter(
+    df_orig.lon, df_orig.lat, s=80, c=df_orig.dmax, transform=tran, zorder=10, ec="0.5", lw=0.5
+)
 cb = fig.colorbar(im, label="dmax [mm]")
+
+ax.pcolormesh(grid_x, grid_y, out, transform=tran, norm=cb.norm, alpha=0.85)
 
 plt.show()
