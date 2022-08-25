@@ -35,7 +35,7 @@ c = slp_coeffs
 
 # NOTE: 215 (08/03) is missing, as are other random days
 start = "2022/04/01"
-end = "2022/04/16"
+end = "2022/04/15"
 ic = None
 
 days = pd.date_range(start, end, freq="D")
@@ -54,12 +54,15 @@ p_minus_et = p.interp(lat=grid.lat, lon=grid.lon) - et.interp(lat=grid.lat, lon=
 print("computing SM")
 ds = grid.copy()
 ds["c"] = (("lat", "lon"), c)
-ds["sm"] = (("time", "lat", "lon"), np.zeros((ntime, nlat, nlon)), {"long_name": "Soil moisture"})
+ds["sm"] = (("time", "lat", "lon"), np.empty((ntime, nlat, nlon)), {"long_name": "Soil moisture"})
 ds["time"] = days
 
-# ic = ds.sm.isel(time=0) + 1  # testing
-if ic is not None:
-    ds["sm"].loc[dict(time=days[0])] = ic
+if ic is None:
+    # Default IC: 0 but using the land mask from P - ET
+    x = p_minus_et.isel(time=0)
+    ic = x.where(x.isnull(), 0)
+
+ds["sm"].loc[dict(time=days[0])] = ic
 
 for i in range(1, len(days)):
     # delta = c * p_minus_et.isel(time=i)
@@ -67,6 +70,6 @@ for i in range(1, len(days)):
     ds["sm"].loc[dict(time=days[i])] = np.clip(ds.sm.isel(time=i - 1) + delta / 1000, 0, 1)
 
 
-ds.sm.plot(col="time", col_wrap=4, vmax=0.1)
+ds.sm.plot(col="time", col_wrap=5, vmax=0.1)
 
 plt.show()
