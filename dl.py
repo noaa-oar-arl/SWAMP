@@ -52,7 +52,7 @@ def get_crn(days, *, use_cache=True):
     years = days.year.astype(str).unique()
     for year in years:
         if year not in available_years:
-            raise ValueError(f"year {year} not in detected available years {available_years}")
+            raise ValueError(f"year {year} not in detected available CRN years {available_years}")
 
         cached_fp = CACHE_DIR / f"CRN_{year}.csv.gz"
         is_cached = cached_fp.is_file()
@@ -65,7 +65,7 @@ def get_crn(days, *, use_cache=True):
             r.raise_for_status()
             fns = re.findall(r">(CRN[a-zA-Z0-9\-_]*\.txt)<", r.text)
             if not fns:
-                warnings.warn(f"no files found for year {year} (url {url})")
+                warnings.warn(f"no CRN files found for year {year} (url {url})", stacklevel=2)
 
             dfs_per_file = []
             for fn in fns:
@@ -102,7 +102,7 @@ def get_crn(days, *, use_cache=True):
     data_cols = [c for c in df.columns if c not in site_cols]
     df = pd.concat(dfs_per_year).dropna(subset=data_cols, how="all").reset_index(drop=True)
     if df.empty:
-        warnings.warn("dataframe empty after dropping missing data rows")
+        warnings.warn("CRN dataframe empty after dropping missing data rows", stacklevel=2)
 
     # Select data at days
     df = df[df.LST_DATE.isin(days.floor("D"))].reset_index(drop=True)
@@ -147,7 +147,7 @@ def get_prism(days, *, use_cache=True):
             r.raise_for_status()
             available_fns = re.findall(r">(PRISM_ppt_[a-zA-Z0-9_]*_bil\.zip)<", r.text)
             if not available_fns:
-                warnings.warn(f"no files found for year {year} (url {url})")
+                warnings.warn(f"no PRISM files found for year {year} (url {url})", stacklevel=2)
             fns_year[year] = available_fns
 
         # Download zip archive (~ 1--2 MB)
@@ -168,7 +168,9 @@ def get_prism(days, *, use_cache=True):
         else:
             raise ValueError(f"file for {ymd} not found. Check {base_url}/{year}/")
         if stab in stabilities[1:]:
-            warnings.warn(f"note 'stable' file for {ymd} not found, using {stab!r}")
+            warnings.warn(
+                f"note 'stable' PRISM file for {ymd} not found, using {stab!r}", stacklevel=2
+            )
 
         zip_fp = CACHE_DIR / fn
         is_cached = zip_fp.is_file()
@@ -269,7 +271,9 @@ def get_alexi(days, *, use_cache=True):
     r.raise_for_status()
     available_yjs = re.findall(r">([0-9]{7})<", r.text)
     if not available_yjs:
-        warnings.warn(f"search of {base_url}/ detected no available dates")
+        warnings.warn(
+            f"search of {base_url}/ detected no available dates for ALEXI ET", stacklevel=2
+        )
 
     dss_per_yj = []
     for yj in yjs:
@@ -286,8 +290,13 @@ def get_alexi(days, *, use_cache=True):
             url = f"{base_url}/{yj}/{fn}"
             print(url)
             r = requests.get(url)
-            r.raise_for_status()
-            # TODO: not too uncommon to be missing, should improve error message
+            if r.status_code == 404:
+                raise ValueError(
+                    f"ALEXI ET file {url} not found. Check {base_url}/{yj}/ to confirm."
+                )
+                # TODO: try to use closest previous date that _does_ exist?
+            else:
+                r.raise_for_status()
             # NOTE: sometimes dir for current day doesn't have the ET file yet
             with open(fp, "wb") as f:
                 f.write(r.content)
