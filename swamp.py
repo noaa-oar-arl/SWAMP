@@ -1,6 +1,7 @@
 """
 SWAMP
 """
+import warnings
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -9,6 +10,8 @@ import pandas as pd
 import xarray as xr
 
 from dl import get_alexi, get_prism
+
+warnings.filterwarnings("ignore", message=r"note 'stable' PRISM file for [0-9]{8} not found")
 
 HERE = Path(__file__).parent
 ORIG = HERE / "orig"
