@@ -3,6 +3,7 @@ Download the SWAMP inputs.
 """
 from __future__ import annotations
 
+import datetime
 import re
 import warnings
 from pathlib import Path
@@ -302,43 +303,7 @@ def get_alexi(days, *, use_cache=True):
                 with open(fp, "wb") as f:
                     f.write(r.content)
 
-        alexi_nlat = 625  # TODO: confirm the grid stuff!?
-        alexi_nlon = 1456
-        alexi_lllat = 24.80
-        alexi_lllon = -125.0
-        alexi_dlat = 0.04
-        alexi_dlon = 0.04
-        alexi_bad = -9999.0
-        if fp.is_file():
-            arr = np.fromfile(fp, dtype=np.float32)
-            arr = arr.reshape(alexi_nlat, alexi_nlon)
-            arr[arr == alexi_bad] = np.nan
-        else:
-            # No data -> all nan (but fill later!)
-            arr = np.full((alexi_nlat, alexi_nlon), np.nan, dtype=np.float32)
-            warnings.warn(f"setting ALEXI ET array to NaN since {fp.name} is missing", stacklevel=2)
-            n_missing_days += 1
-
-        # Construct Dataset
-        lat = alexi_lllat + np.arange(alexi_nlat) * alexi_dlat
-        lon = alexi_lllon + np.arange(alexi_nlon) * alexi_dlon
-        ds = xr.Dataset(
-            data_vars={
-                "et": (
-                    ("lat", "lon"),
-                    arr,
-                    {
-                        "long_name": "Evapotranspiration",
-                        "units": "mm",
-                        "description": "Daily evapotranspiration",
-                    },
-                ),
-            },
-            coords={
-                "lat": (("lat",), lat),
-                "lon": (("lon",), lon),
-            },
-        )
+        ds = load_alexi(fp)
         dss_per_yj.append(ds)
 
     # Combined Dataset
@@ -349,6 +314,55 @@ def get_alexi(days, *, use_cache=True):
     if n_missing_days:
         ds = ds.interpolate_na(dim="time", method="nearest")
         # TODO: quite slow! better to find the nearest day another way and take its array before the concat
+
+    return ds
+
+
+def load_alexi(fp: Path):
+    """Load an ALEXI ET file (binary), returning an xarray Dataset."""
+
+    # Convert binary file to 2-D array
+    alexi_nlat = 625  # TODO: confirm the grid stuff!?
+    alexi_nlon = 1456
+    alexi_lllat = 24.80
+    alexi_lllon = -125.0
+    alexi_dlat = 0.04
+    alexi_dlon = 0.04
+    alexi_bad = -9999.0
+    if fp.is_file():
+        arr = np.fromfile(fp, dtype=np.float32)
+        arr = arr.reshape(alexi_nlat, alexi_nlon)
+        arr[arr == alexi_bad] = np.nan
+    else:
+        # No data -> all nan (but fill later!)
+        arr = np.full((alexi_nlat, alexi_nlon), np.nan, dtype=np.float32)
+        warnings.warn(f"setting ALEXI ET array to NaN since {fp.name} is missing", stacklevel=2)
+        n_missing_days += 1
+
+    # Get time from file path
+    t = datetime.datetime.strptime(fp.stem[-7:], r"%Y%j")
+
+    # Construct Dataset
+    lat = alexi_lllat + np.arange(alexi_nlat) * alexi_dlat
+    lon = alexi_lllon + np.arange(alexi_nlon) * alexi_dlon
+    ds = xr.Dataset(
+        data_vars={
+            "et": (
+                ("lat", "lon"),
+                arr,
+                {
+                    "long_name": "Evapotranspiration",
+                    "units": "mm",
+                    "description": "Daily evapotranspiration",
+                },
+            ),
+        },
+        coords={
+            "lat": (("lat",), lat),
+            "lon": (("lon",), lon),
+            "time": (("time",), [t]),
+        },
+    )
 
     return ds
 

@@ -13,6 +13,10 @@ dependencies:
   - requests
   - xarray
   #
+  # extra
+  - nco
+  - netcdf4
+  #
   # test
   - pytest
   #
