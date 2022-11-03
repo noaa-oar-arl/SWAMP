@@ -15,15 +15,14 @@ Currently missing:
 """
 import calendar
 import datetime
-import subprocess
 import os
+import subprocess
 from pathlib import Path
 
 import pandas as pd
 import xarray as xr
 
 from dl import load_alexi
-
 
 now = datetime.datetime.now()
 here = Path(__file__).parent

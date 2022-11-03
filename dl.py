@@ -303,7 +303,12 @@ def get_alexi(days, *, use_cache=True):
                 with open(fp, "wb") as f:
                     f.write(r.content)
 
-        ds = load_alexi(fp)
+        if fp.is_file():
+            ds = load_alexi(fp)
+        else:
+            ds = load_alexi(None)
+            n_missing_days += 1
+
         dss_per_yj.append(ds)
 
     # Combined Dataset
@@ -318,7 +323,7 @@ def get_alexi(days, *, use_cache=True):
     return ds
 
 
-def load_alexi(fp: Path):
+def load_alexi(fp: Path | None):
     """Load an ALEXI ET file (binary), returning an xarray Dataset."""
 
     # Convert binary file to 2-D array
@@ -329,15 +334,14 @@ def load_alexi(fp: Path):
     alexi_dlat = 0.04
     alexi_dlon = 0.04
     alexi_bad = -9999.0
-    if fp.is_file():
-        arr = np.fromfile(fp, dtype=np.float32)
-        arr = arr.reshape(alexi_nlat, alexi_nlon)
-        arr[arr == alexi_bad] = np.nan
-    else:
+    if fp is None:
         # No data -> all nan (but fill later!)
         arr = np.full((alexi_nlat, alexi_nlon), np.nan, dtype=np.float32)
         warnings.warn(f"setting ALEXI ET array to NaN since {fp.name} is missing", stacklevel=2)
-        n_missing_days += 1
+    else:
+        arr = np.fromfile(fp, dtype=np.float32)
+        arr = arr.reshape(alexi_nlat, alexi_nlon)
+        arr[arr == alexi_bad] = np.nan
 
     # Get time from file path
     t = datetime.datetime.strptime(fp.stem[-7:], r"%Y%j")
