@@ -54,9 +54,8 @@ p = get_prism(days).ppt
 print("loading ALEXI ET")
 et = get_alexi(days).et
 print("computing P - ET")
-p_minus_et = p.interp(lat=grid.lat, lon=grid.lon) - et.interp(lat=grid.lat, lon=grid.lon)
+p_minus_et = p.interp(lat=grid.lat, lon=grid.lon) - 0.408 * et.interp(lat=grid.lat, lon=grid.lon)
 p_minus_et.attrs.update(long_name="P - ET", units="mm")
-# NOTE: original SWAMP multiples ET by 0.408, but they already have matching units...??
 
 # Initialize sm dataset
 print("computing SM")
