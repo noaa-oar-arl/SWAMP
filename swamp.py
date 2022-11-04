@@ -9,8 +9,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
+from metpy.interpolate import interpolate_to_grid, remove_nan_observations
 
-from dl import get_alexi, get_prism
+from dl import get_alexi, get_crn, get_prism
 
 plt.close("all")
 
@@ -45,6 +46,18 @@ start = "2022/04/01"
 end = "2022/04/15"
 ic = None
 
+# IC based on CRN
+df = get_crn([start])
+x = df["LONGITUDE"]
+y = df["LATITUDE"]
+v = df["SOIL_MOISTURE_5_DAILY"].copy()
+v.loc[v == -99] = np.nan
+x, y, v = remove_nan_observations(x, y, v)
+xg, yg, vg = interpolate_to_grid(x, y, v, interp_type="rbf", hres=0.1)
+ic = xr.DataArray(data=vg, coords={"lat": yg[:, 0], "lon": xg[0, :]}, dims=("lat", "lon")).interp(
+    lat=grid.lat, lon=grid.lon
+)
+
 days = pd.date_range(start, end, freq="D")
 ntime = len(days)
 
@@ -75,7 +88,6 @@ if ic is None:
 ds["sm"].loc[dict(time=days[0])] = ic
 
 for i in range(1, len(days)):
-    # delta = c * p_minus_et.isel(time=i)
     delta = ds.c * p_minus_et.isel(time=i)
     ds["sm"].loc[dict(time=days[i])] = np.clip(ds.sm.isel(time=i - 1) + delta / 1000, 0, 1)
 
