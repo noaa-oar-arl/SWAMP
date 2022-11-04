@@ -47,6 +47,7 @@ end = "2022/04/15"
 ic = None
 
 # IC based on CRN
+# TODO: try using the AWC calculation instead
 df = get_crn([start])
 x = df["LONGITUDE"]
 y = df["LATITUDE"]

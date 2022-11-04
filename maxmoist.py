@@ -98,4 +98,6 @@ cb = fig.colorbar(im, label="dmax [mm]")
 
 ax.pcolormesh(grid_x, grid_y, out, transform=tran, norm=cb.norm, alpha=0.85)
 
+# TODO: also plot dmin and delta
+
 plt.show()
