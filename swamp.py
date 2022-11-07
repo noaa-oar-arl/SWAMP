@@ -104,6 +104,7 @@ for i in range(1, len(days)):
 
     # Multiplying by the soil depth, we convert the previous sm field from m3 m-3 to mm
     # This gives it units like: mm water per <soil depth> depth of soil per unit area
+    # Then, we convert back
     ds["sm"].loc[dict(time=days[i])] = np.clip(
         (soil_depth_mm * ds.sm.isel(time=i - 1) + delta_mm) / soil_depth_mm,
         0,
