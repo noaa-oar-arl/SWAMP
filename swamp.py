@@ -85,6 +85,7 @@ ds["sm"] = (
         "long_name": "Soil moisture",
         "units": "m3 m-3",
         "description": f"Volumetric soil water content for the top {soil_depth_cm} cm of soil",
+        "long_units": "(m3 water) m-3",
     },
 )
 ds["time"] = days
