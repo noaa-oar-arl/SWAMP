@@ -73,10 +73,20 @@ p_minus_et.attrs.update(long_name="P - ET", units="mm")
 
 # Initialize sm dataset
 print("computing SM")
+soil_depth_cm = 25  # soil depth of interest
+soil_depth_mm = soil_depth_cm * 10
 ds = grid.copy()
 ds["c"] = (("lat", "lon"), c, {"long_name": "Coefficient"})
 ds["c"] = ds.c.where(ds.c > 0, np.nan)
-ds["sm"] = (("time", "lat", "lon"), np.empty((ntime, nlat, nlon)), {"long_name": "Soil moisture"})
+ds["sm"] = (
+    ("time", "lat", "lon"),
+    np.empty((ntime, nlat, nlon)),
+    {
+        "long_name": "Soil moisture",
+        "units": "m3 m-3",
+        "description": f"Volumetric soil water content for the top {soil_depth_cm} cm of soil",
+    },
+)
 ds["time"] = days
 
 if ic is None:
@@ -89,8 +99,16 @@ if ic is None:
 ds["sm"].loc[dict(time=days[0])] = ic
 
 for i in range(1, len(days)):
-    delta = ds.c * p_minus_et.isel(time=i)
-    ds["sm"].loc[dict(time=days[i])] = np.clip(ds.sm.isel(time=i - 1) + delta / 1000, 0, 1)
+    delta_mm = ds.c * p_minus_et.isel(time=i)
+    # delta_mm = p_minus_et.isel(time=i)  # for "smn" in the Fortran (no weighting coeffs used)
+
+    # Multiplying by the soil depth, we convert the previous sm field from m3 m-3 to mm
+    # This gives it units like: mm water per <soil depth> depth of soil per unit area
+    ds["sm"].loc[dict(time=days[i])] = np.clip(
+        (soil_depth_mm * ds.sm.isel(time=i - 1) + delta_mm) / soil_depth_mm,
+        0,
+        1,
+    )
 
 
 # -21.25 coeffs
