@@ -105,6 +105,10 @@ def get_crn(days, *, use_cache=True):
     if df.empty:
         warnings.warn("CRN dataframe empty after dropping missing data rows", stacklevel=2)
 
+    # Set soil moisture -99 to NaN
+    sm_cols = df.columns[df.columns.str.startswith("SOIL_MOISTURE_")]
+    df[sm_cols] = df[sm_cols].replace(-99, np.nan)
+
     # Select data at days
     df = df[df.LST_DATE.isin(days.floor("D"))].reset_index(drop=True)
 

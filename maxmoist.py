@@ -7,9 +7,10 @@ import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import xarray as xr
 from scipy import interpolate
 
-# from dl import get_crn
+from dl import get_crn
 
 HERE = Path(__file__).parent
 ORIG = HERE / "orig"
@@ -99,5 +100,58 @@ cb = fig.colorbar(im, label="dmax [mm]")
 ax.pcolormesh(grid_x, grid_y, out, transform=tran, norm=cb.norm, alpha=0.85)
 
 # TODO: also plot dmin and delta
+
+# Compute from CRN data?
+dates = pd.date_range("2010/01/01", "2021/01/01", freq="D")[:-1]
+df = get_crn(dates)
+sm_cols = df.columns[df.columns.str.startswith("SOIL_MOISTURE_")].tolist()
+meta_cols = ["WBANNO", "LST_DATE", "LATITUDE", "LONGITUDE"]
+df_sm = (
+    df[meta_cols + sm_cols]
+    .rename(columns=lambda x: "sm_" + x.split("_")[2] if x.startswith("SOIL_MOISTURE_") else x)
+    .rename(columns={"WBANNO": "siteid", "LST_DATE": "time", "LATITUDE": "lat", "LONGITUDE": "lon"})
+)
+assert (df_sm.time == df_sm.time.dt.floor("D")).all()
+
+# TODO: xarray interp later could be another option
+df_sm["sm_25"] = (df_sm.sm_50 - df_sm.sm_20) / (50 - 20) * (25 - 20)
+
+# Form xarray Dataset
+# sm_cols = df_sm.columns[df_sm.columns.str.startswith("sm_")].sort_values(key=lambda x: x.str.slice(3, None).astype(float))
+sm_cols = sorted(
+    df_sm.columns[df_sm.columns.str.startswith("sm_")], key=lambda x: int(x.split("_")[1])
+)
+sm_d_vals = [float(x.split("_")[1]) for x in sm_cols]
+# df_sm["sm"] = df_sm[sm_cols].values.tolist()
+# TODO: un-widen the table (variable column, value column)
+
+ds_sm = (
+    df_sm.set_index(["siteid", "time"])
+    # .drop(columns=sm_cols)
+    .to_xarray()
+    .assign(depth=("depth", sm_d_vals))
+    .set_coords(["lat", "lon"])
+)
+
+ds_sm["sm"] = (
+    ("siteid", "time", "depth"),
+    np.empty((ds_sm.sizes["siteid"], ds_sm.sizes["time"], len(sm_d_vals))),
+    {
+        "long_name": "Soil moisture",
+        "units": "m3 m-3",
+    },
+)
+for d, vn in zip(sm_d_vals, sm_cols):
+    ds_sm["sm"].loc[dict(depth=d)] = ds_sm[vn]
+
+ds_sm = ds_sm.drop_vars(sm_cols)
+
+# 25-cm sm: trapezoidal integrated average over the 0--25-cm region
+avg = ds_sm.sm.sel(depth=slice(None, 25)).integrate("depth") / 25
+
+gb = avg.groupby("time.year")
+res = xr.merge([gb.min().rename("min"), gb.mean().rename("mean"), gb.max().rename("max")])
+df_res = res.to_dataframe().reset_index()
+
 
 plt.show()
