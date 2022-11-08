@@ -151,7 +151,11 @@ avg = ds_sm.sm.sel(depth=slice(None, 25)).integrate("depth") / 25
 
 gb = avg.groupby("time.year")
 res = xr.merge([gb.min().rename("min"), gb.mean().rename("mean"), gb.max().rename("max")])
-df_res = res.to_dataframe().reset_index()
-
+df_res = (
+    res.to_dataframe()
+    .reset_index()
+    .merge(df_sm.groupby("siteid")[["lat", "lon"]].first().reset_index(), how="left", on="siteid")
+)
+# TODO: ensure lat/lon unique for site in time
 
 plt.show()
