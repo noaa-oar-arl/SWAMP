@@ -11,7 +11,7 @@ import pandas as pd
 import xarray as xr
 from metpy.interpolate import interpolate_to_grid, remove_nan_observations
 
-from dl import get_alexi, get_crn, get_prism
+from .load import get_alexi, get_crn, get_prism
 
 plt.close("all")
 

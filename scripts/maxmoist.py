@@ -10,10 +10,10 @@ import pandas as pd
 import xarray as xr
 from scipy import interpolate
 
-from dl import get_crn
+from swamp import get_crn
 
 HERE = Path(__file__).parent
-ORIG = HERE / "orig"
+ORIG = HERE / "../orig"
 
 days = pd.date_range("2010/01/01", "2020/12/31")
 

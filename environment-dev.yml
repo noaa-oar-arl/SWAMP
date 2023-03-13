@@ -8,13 +8,13 @@ dependencies:
   # core
   - cartopy
   - matplotlib
+  - metpy
   - numpy
   - pandas
   - requests
   - xarray
   #
   # extra
-  - metpy
   - nco
   - netcdf4
   #

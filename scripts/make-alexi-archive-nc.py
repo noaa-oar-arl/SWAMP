@@ -22,7 +22,7 @@ from pathlib import Path
 import pandas as pd
 import xarray as xr
 
-from dl import load_alexi
+from swamp import load_alexi
 
 now = datetime.datetime.now()
 here = Path(__file__).parent
