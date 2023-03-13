@@ -4,7 +4,7 @@ NOAA-ARL/ATDD Soil Water Analysis Model Product (SWAMP)
 
 ## Development installation
 
-1. Create Conda environment based on `environment-dev.yml`.
+1. Create Conda environment based on [`environment-dev.yml`](./environment-dev.yml).
    ```
    conda env create -f environment-dev.yml
    ```
