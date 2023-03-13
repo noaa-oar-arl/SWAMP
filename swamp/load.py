@@ -284,7 +284,9 @@ def get_alexi(days, *, use_cache=True):
     dss_per_yj = []
     for yj in yjs:
         if yj not in available_yjs:
-            raise ValueError(f"date {yj} not in detected available dates {available_yjs}")
+            warnings.warn(
+                f"date {yj} not in detected ALEXI ET available dates {available_yjs}", stacklevel=2
+            )
 
         # e.g. https://geo.nsstc.nasa.gov/SPoRT/outgoing/crh/4ecostress/2022019/ALEXI_ET_4KM_CONUS_V01_2022019.dat
         fn = f"ALEXI_ET_4KM_CONUS_V01_{yj}.dat"

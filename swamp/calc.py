@@ -16,6 +16,7 @@ from .load import get_alexi, get_crn, get_prism
 plt.close("all")
 
 warnings.filterwarnings("ignore", message=r"note 'stable' PRISM file for [0-9]{8} not found")
+warnings.filterwarnings("ignore", message=r"date [0-9]{7} not in detected ALEXI ET available dates")
 
 HERE = Path(__file__).parent
 ORIG = HERE / "../orig"
