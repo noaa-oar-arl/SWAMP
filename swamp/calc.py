@@ -18,7 +18,7 @@ plt.close("all")
 warnings.filterwarnings("ignore", message=r"note 'stable' PRISM file for [0-9]{8} not found")
 
 HERE = Path(__file__).parent
-ORIG = HERE / "orig"
+ORIG = HERE / "../orig"
 
 # Define output grid
 # NOTE: this is 3.8-km in lat and ~ 4.4-km in lon
