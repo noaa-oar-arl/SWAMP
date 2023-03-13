@@ -359,7 +359,7 @@ def load_alexi(fp: Path | None):
         data_vars={
             "et": (
                 ("lat", "lon"),
-                arr,
+                0.408 * arr,  # MJ m-2 -> mm
                 {
                     "long_name": "Evapotranspiration",
                     "units": "mm",
