@@ -134,6 +134,9 @@ p_minus_et.plot(col="time", col_wrap=5, robust=True, size=2, aspect=1.5)
 ds.sm.plot(col="time", col_wrap=5, robust=True, size=2, aspect=1.5)
 
 # Plot deltas
-ds.sm.diff("time", label="lower").plot(col="time", col_wrap=5, robust=True, size=2, aspect=1.5)
+with xr.set_options(keep_attrs=True):
+    dsm = ds.sm.diff("time", label="lower")
+    dsm.attrs.update(long_name="Soil moisture increment (daily)")
+    dsm.plot(col="time", col_wrap=5, robust=True, size=2, aspect=1.5)
 
 plt.show()
