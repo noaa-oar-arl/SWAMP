@@ -131,11 +131,11 @@ def run(start, end, *, ic=None, ic_kws=None):
     Parameters
     ----------
     start, end
-        Passed to `pd.date_range` to generate the days to run.
-    ic : {'crn', 'awc', 'zero'}, 0, xr.DataArray, optional
+        Passed to `pandas.date_range` to generate the days to run.
+    ic : {'crn', 'awc', 'zero'}, 0, xarray.DataArray, optional
         Initial condition.
     ic_kws : dict, optional
-        For example, metpy inter-to-grid settings.
+        For example, MetPy interpolate-to-grid settings.
     """
     from .load import get_alexi, get_prism
 
