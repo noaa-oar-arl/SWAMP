@@ -148,6 +148,7 @@ def run(start, end, *, ic=None, ic_kws=None):
     print("loading ALEXI ET")
     et = get_alexi(days).et
     print("computing P - ET")
+    # TODO: better interp, e.g. xESMF conservative (can store the weight file)
     p_minus_et = p.interp(lat=GRID.lat, lon=GRID.lon) - et.interp(lat=GRID.lat, lon=GRID.lon)
     p_minus_et.attrs.update(long_name="P - ET", units="mm")
 
