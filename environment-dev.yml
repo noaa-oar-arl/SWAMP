@@ -23,3 +23,4 @@ dependencies:
   #
   # dev
   - ipython
+  - jupyterlab
