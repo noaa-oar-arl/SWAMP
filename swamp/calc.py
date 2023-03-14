@@ -20,6 +20,7 @@ _NLAT, _NLON = (720, 1150)
 def _get_grid():
     # Define output grid
     # NOTE: this is 3.8-km in lat and ~ 4.4-km in lon
+    # TODO: fix grid (coeffs don't quite match up with continent border)
     lat = np.linspace(25, 50, _NLAT)
     lon = np.linspace(-125, -65, _NLON)
     grid = xr.Dataset(
