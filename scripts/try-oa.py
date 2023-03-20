@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from metpy.interpolate import interpolate_to_grid, remove_nan_observations
 
-from swamp import get_crn
+from swampy import get_crn
 
 plt.close("all")
 

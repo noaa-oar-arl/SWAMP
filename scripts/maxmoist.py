@@ -10,7 +10,7 @@ import pandas as pd
 import xarray as xr
 from scipy import interpolate
 
-from swamp import get_crn
+from swampy import get_crn
 
 HERE = Path(__file__).parent
 ORIG = HERE / "../orig"

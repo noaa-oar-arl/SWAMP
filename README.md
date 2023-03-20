@@ -9,7 +9,7 @@ NOAA-ARL/ATDD Soil Water Analysis Model Product (SWAMP)
    conda env create -f environment-dev.yml
    conda activate swamp-dev
    ```
-2. Install `swamp` package using
+2. Install `swampy` package using
    ```
    pip install -e . --no-deps
    ```
