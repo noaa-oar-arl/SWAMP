@@ -1,0 +1,26 @@
+name: swamp-dev
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.9
+  #
+  # core
+  - cartopy
+  - matplotlib
+  - metpy
+  - numpy
+  - pandas
+  - requests
+  - xarray
+  #
+  # extra
+  - nco
+  - netcdf4
+  #
+  # test
+  - pytest
+  #
+  # dev
+  - ipython
+  - jupyterlab
