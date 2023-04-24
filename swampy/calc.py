@@ -138,17 +138,20 @@ def _ic_zero(x):
     return x.where(x.isnull(), 0)
 
 
-def run(start, end, *, ic=None, ic_kws=None, quiet=False):
+def run(start, end, *, ic=None, ic_kws=None, use_intercept=False, quiet=False):
     """Compute gridded soil moisture using the SWAMP algorithm.
 
     Parameters
     ----------
     start, end
         Passed to `pandas.date_range` to generate the days to run.
+        Date `start` gets the IC.
     ic : {'crn', 'awc', 'zero'} or 0 or xarray.DataArray, optional
         Initial condition. Defaults to zero.
     ic_kws : dict, optional
         For example, MetPy interpolate-to-grid settings.
+    use_intercept : bool
+        Apply the intercept term (in addition to the slope term) to P - ET.
     quiet : bool
         Don't print info messages.
     """
@@ -225,9 +228,12 @@ def run(start, end, *, ic=None, ic_kws=None, quiet=False):
     ds["smn"].loc[dict(time=days[0])] = ic
 
     for i in range(1, ntime):
+        # sm(i) = sm(i - 1) + [P - ET during day i]    Eq. 2 in SWAMP paper draft
         delta_mm_no_coeff = p_minus_et.isel(time=i)
         # ^ for "smn" in the Fortran (no weighting coeffs used)
         delta_mm = ds.c1 * delta_mm_no_coeff
+        if use_intercept:
+            delta_mm += ds.c0
 
         # Multiplying by the soil depth, we convert the previous sm field from m3 m-3 to mm
         # This gives it units like: mm water per <soil depth> depth of soil per unit area
