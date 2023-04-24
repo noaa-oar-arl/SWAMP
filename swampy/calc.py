@@ -145,7 +145,7 @@ def run(start, end, *, ic=None, ic_kws=None, quiet=False):
     ----------
     start, end
         Passed to `pandas.date_range` to generate the days to run.
-    ic : {'crn', 'awc', 'zero'}, 0, xarray.DataArray, optional
+    ic : {'crn', 'awc', 'zero'} or 0 or xarray.DataArray, optional
         Initial condition. Defaults to zero.
     ic_kws : dict, optional
         For example, MetPy interpolate-to-grid settings.
