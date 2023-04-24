@@ -158,7 +158,7 @@ def run(start, end, *, ic=None, ic_kws=None):
     print("computing SM")
     soil_depth_cm = 25  # soil depth of interest
     soil_depth_mm = soil_depth_cm * 10
-    ds = _get_coeffs_ds().copy()
+    ds = C.copy()
     ds["sm"] = (
         ("time", "lat", "lon"),
         np.empty((ntime, _NLAT, _NLON)),
