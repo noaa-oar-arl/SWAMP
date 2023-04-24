@@ -180,6 +180,15 @@ def run(start, end, *, ic=None, ic_kws=None):
         },
     )
     ds["time"] = days
+    ds["d"] = (
+        (),
+        soil_depth_mm,
+        {
+            "long_name": "Soil depth",
+            "units": "mm",
+            "description": "Multiply fractional volumetric soil moisture by this to convert from m3 m-3 to mm",
+        },
+    )
 
     if ic_kws is None:
         ic_kws = {}
