@@ -91,26 +91,37 @@ def _ic_awc(date, **kwargs):
     interp_kws = {**_DEFAULT_METPY_INTERP_KWS, **kwargs}
 
     df = get_crn([date])
-    x = df["LONGITUDE"]
-    y = df["LATITUDE"]
 
+    x = df["LONGITUDE"].copy()
+    y = df["LATITUDE"].copy()
     v5cm = df["SOIL_MOISTURE_5_DAILY"].copy()
     v5cm.loc[v5cm == -99] = np.nan
-    x, y, v5cm = remove_nan_observations(x, y, v5cm)
-    xg, yg, vg5cm = interpolate_to_grid(x, y, v5cm, **interp_kws)
+    # x, y, v5cm = remove_nan_observations(x, y, v5cm)
+    # xg, yg, vg5cm = interpolate_to_grid(x, y, v5cm, **interp_kws)
 
+    # x = df["LONGITUDE"].copy()
+    # y = df["LATITUDE"].copy()
     v10cm = df["SOIL_MOISTURE_10_DAILY"].copy()
     v10cm.loc[v10cm == -99] = np.nan
-    x, y, v10cm = remove_nan_observations(x, y, v10cm)
-    xg, yg, vg10cm = interpolate_to_grid(x, y, v10cm, **interp_kws)
+    # x, y, v10cm = remove_nan_observations(x, y, v10cm)
+    # xg, yg, vg10cm = interpolate_to_grid(x, y, v10cm, **interp_kws)
 
+    # x = df["LONGITUDE"].copy()
+    # y = df["LATITUDE"].copy()
     v20cm = df["SOIL_MOISTURE_20_DAILY"].copy()
     v20cm.loc[v20cm == -99] = np.nan
-    x, y, v20cm = remove_nan_observations(x, y, v20cm)
-    xg, yg, vg20cm = interpolate_to_grid(x, y, v20cm, **interp_kws)
+    # x, y, v20cm = remove_nan_observations(x, y, v20cm)
+    # xg, yg, vg20cm = interpolate_to_grid(x, y, v20cm, **interp_kws)
+
+    # awc = 7.5 * vg5cm + 7.5 * vg10cm + 20 * vg20cm
+
+    # TODO: might be better to add gridded instead of adding first and then gridding
+    awcp = 7.5 * v5cm + 7.5 * v10cm + 20 * v20cm
+    x, y, awc = remove_nan_observations(x, y, awcp)
+    xg, yg, awc = interpolate_to_grid(x, y, awc, **interp_kws)
 
     ic = xr.DataArray(
-        data=7.5 * vg5cm + 7.5 * vg10cm + 20 * vg20cm,
+        data=awc,
         coords={"lat": yg[:, 0], "lon": xg[0, :]},
         dims=("lat", "lon"),
     ).interp(
@@ -127,7 +138,7 @@ def _ic_zero(x):
     return x.where(x.isnull(), 0)
 
 
-def run(start, end, *, ic=None, ic_kws=None):
+def run(start, end, *, ic=None, ic_kws=None, quiet=False):
     """Compute gridded soil moisture using the SWAMP algorithm.
 
     Parameters
@@ -135,9 +146,11 @@ def run(start, end, *, ic=None, ic_kws=None):
     start, end
         Passed to `pandas.date_range` to generate the days to run.
     ic : {'crn', 'awc', 'zero'}, 0, xarray.DataArray, optional
-        Initial condition.
+        Initial condition. Defaults to zero.
     ic_kws : dict, optional
         For example, MetPy interpolate-to-grid settings.
+    quiet : bool
+        Don't print info messages.
     """
     from .load import get_alexi, get_prism
 
@@ -145,17 +158,21 @@ def run(start, end, *, ic=None, ic_kws=None):
     ntime = len(days)
 
     # Compute P - ET at the grid
-    print("loading PRISM P")
+    if not quiet:
+        print("loading PRISM P")
     p = get_prism(days).ppt
-    print("loading ALEXI ET")
+    if not quiet:
+        print("loading ALEXI ET")
     et = get_alexi(days).et
-    print("computing P - ET")
+    if not quiet:
+        print("computing P - ET")
     # TODO: better interp, e.g. xESMF conservative (can store the weight file)
     p_minus_et = p.interp(lat=GRID.lat, lon=GRID.lon) - et.interp(lat=GRID.lat, lon=GRID.lon)
     p_minus_et.attrs.update(long_name="P - ET", units="mm")
 
     # Initialize sm dataset
-    print("computing SM")
+    if not quiet:
+        print("computing SM")
     soil_depth_cm = 25  # soil depth of interest
     soil_depth_mm = soil_depth_cm * 10
     ds = C.copy()

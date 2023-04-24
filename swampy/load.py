@@ -137,7 +137,6 @@ def get_prism(days, *, use_cache=True):
     dss_per_day = []
     fns_year = {}
     ymds = days.strftime(r"%Y%m%d").unique()
-    # TODO: cache the files (probably just the straight zip ones? or nc?)
     for ymd in ymds:
         year = ymd[:4]
         if year not in available_years:
