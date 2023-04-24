@@ -42,17 +42,19 @@ def _get_coeffs_ds(*, mask_neg=True):
     slp_coeffs = np.loadtxt(_ORIG / "PROCESS_DAILY/slp_weights.txt")
     int_coeffs = np.loadtxt(_ORIG / "PROCESS_DAILY/int_weights.txt")
     assert slp_coeffs.shape == int_coeffs.shape == (_NLAT, _NLON)
-    c = slp_coeffs
+    c0 = int_coeffs
+    c1 = slp_coeffs
 
     ds = GRID.copy()
-    ds["c"] = (("lat", "lon"), c, {"long_name": "Coefficient"})
+    ds["c0"] = (("lat", "lon"), c0, {"long_name": "Intercept coefficient"})
+    ds["c1"] = (("lat", "lon"), c1, {"long_name": "Slope coefficient"})
     if mask_neg:
-        ds["c"] = ds.c.where(ds.c > 0, np.nan)
+        ds["c1"] = ds.c1.where(ds.c1 > 0, np.nan)
 
     return ds
 
 
-C = _get_coeffs_ds().c
+C = _get_coeffs_ds()
 
 _DEFAULT_METPY_INTERP_KWS = dict(interp_type="rbf", hres=0.1)
 
@@ -173,7 +175,7 @@ def run(start, end, *, ic=None, ic_kws=None):
         ic_kws = {}
 
     if ic is None or ic == 0 or isinstance(ic, str) and ic.lower() == "zero":
-        ic = _ic_zero(ds.c)
+        ic = _ic_zero(ds.c1)
     elif isinstance(ic, str) and ic.lower() == "crn":
         ic = _ic_crn(start, **ic_kws)
     elif isinstance(ic, str) and ic.lower() == "awc":
@@ -186,7 +188,7 @@ def run(start, end, *, ic=None, ic_kws=None):
     ds["sm"].loc[dict(time=days[0])] = ic
 
     for i in range(1, ntime):
-        delta_mm = ds.c * p_minus_et.isel(time=i)
+        delta_mm = ds.c1 * p_minus_et.isel(time=i)
         # delta_mm = p_minus_et.isel(time=i)  # for "smn" in the Fortran (no weighting coeffs used)
 
         # Multiplying by the soil depth, we convert the previous sm field from m3 m-3 to mm
@@ -198,6 +200,6 @@ def run(start, end, *, ic=None, ic_kws=None):
             1,
         )
 
-    ds = ds.drop_vars("c")
+    ds = ds.drop_vars(["c0", "c1"])
 
     return ds
