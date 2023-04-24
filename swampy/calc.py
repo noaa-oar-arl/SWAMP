@@ -169,6 +169,16 @@ def run(start, end, *, ic=None, ic_kws=None):
             "long_units": "(m3 water) m-3",
         },
     )
+    ds["smn"] = (
+        ("time", "lat", "lon"),
+        np.empty((ntime, _NLAT, _NLON)),
+        {
+            "long_name": "Soil moisture",
+            "units": "m3 m-3",
+            "description": f"Fractional volumetric water content for the top {soil_depth_cm} cm of soil without using the coefficients",
+            "long_units": "(m3 water) m-3",
+        },
+    )
     ds["time"] = days
 
     if ic_kws is None:
@@ -186,16 +196,23 @@ def run(start, end, *, ic=None, ic_kws=None):
         raise ValueError(f"invalid `ic` setting {ic!r}")
 
     ds["sm"].loc[dict(time=days[0])] = ic
+    ds["smn"].loc[dict(time=days[0])] = ic
 
     for i in range(1, ntime):
-        delta_mm = ds.c1 * p_minus_et.isel(time=i)
-        # delta_mm = p_minus_et.isel(time=i)  # for "smn" in the Fortran (no weighting coeffs used)
+        delta_mm_no_coeff = p_minus_et.isel(time=i)
+        # ^ for "smn" in the Fortran (no weighting coeffs used)
+        delta_mm = ds.c1 * delta_mm_no_coeff
 
         # Multiplying by the soil depth, we convert the previous sm field from m3 m-3 to mm
         # This gives it units like: mm water per <soil depth> depth of soil per unit area
         # Then, we convert back
         ds["sm"].loc[dict(time=days[i])] = np.clip(
             (soil_depth_mm * ds.sm.isel(time=i - 1) + delta_mm) / soil_depth_mm,
+            0,
+            1,
+        )
+        ds["smn"].loc[dict(time=days[i])] = np.clip(
+            (soil_depth_mm * ds.smn.isel(time=i - 1) + delta_mm_no_coeff) / soil_depth_mm,
             0,
             1,
         )
