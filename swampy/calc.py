@@ -198,4 +198,6 @@ def run(start, end, *, ic=None, ic_kws=None):
             1,
         )
 
+    ds = ds.drop_vars("c")
+
     return ds
