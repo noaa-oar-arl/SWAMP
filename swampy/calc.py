@@ -71,7 +71,7 @@ def _ic_crn(date, **kwargs):
     df = get_crn([date])
     x = df["LONGITUDE"]
     y = df["LATITUDE"]
-    v = df["SOIL_MOISTURE_5_DAILY"].copy()
+    v = df["SOIL_MOISTURE_20_DAILY"].copy()
     v.loc[v == -99] = np.nan
     x, y, v = remove_nan_observations(x, y, v)
     xg, yg, vg = interpolate_to_grid(x, y, v, **interp_kws)
